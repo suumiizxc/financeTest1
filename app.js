@@ -3,7 +3,9 @@ var uiController = (function(){
         inputType: ".add__type",
         inputDescription: ".add__description",
         inputValue: ".add__value",
-        inputBtn: '.add__btn'
+        inputBtn: '.add__btn',
+        incomeList: ".income__list",
+        expenseList: ".expenses__list"
 
     }
     
@@ -25,18 +27,37 @@ var uiController = (function(){
         addListItem : function(item, type){
             var html,list;
             if(type === "inc"){
-                list = ".income__list";
+                list = DOMstrings.incomeList;
                 var html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">%VALUE%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';  
             } else{
-                list = ".expenses__list";
+                list = DOMstrings.expenseList;
                 var html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">%VALUE%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
             }
 
             html = html.replace("%id%", item.id);
             html = html.replace("%DESCRIPTION%", item.description);
             html = html.replace("%VALUE%", item.value);
-            console.log(html);
+            
             document.querySelector(list).insertAdjacentHTML('beforeend', html);
+        },
+        clearFields: function(){
+            var fields = document.querySelectorAll(DOMstrings.inputDescription + ", "  + DOMstrings.inputValue);
+
+            // Convert List to Array
+
+            var fieldsArr = Array.prototype.slice.call(fields);
+            
+            // clear Description and Value section
+            // for(var i = 0; i < fieldsArr.length; i++){
+            //     fieldsArr[i].value = "";
+            // }
+
+            fieldsArr.forEach(element => {
+                element.value="";
+            });
+
+            fieldsArr[0].focus();
+
         }
     }
 
@@ -108,9 +129,10 @@ var appController = (function(uiController, financeController){
         var input = uiController.getInput();
 
         var item = financeController.addItem(input.type,input.description, input.value);
-        console.log(item);
 
         uiController.addListItem(item, input.type);
+        uiController.clearFields();
+        
     }
     
     var setupEventListener = function(){
