@@ -14,7 +14,7 @@ var uiController = (function(){
             return{
                 type: document.querySelector(DOMstrings.inputType).value,
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                value: parseInt(document.querySelector(DOMstrings.inputValue).value)
 
             }
         },
@@ -76,6 +76,20 @@ var financeController = function(){
         this.value = value;
     }
 
+    var calculateTotal = function(type){
+        var sum = 0;
+        data.items[type].forEach(function(el){
+            sum = sum + el.value;
+        })
+
+        data.totals[type] = sum;
+
+        data.balance = data.totals['inc'] - data.totals['exp'];
+
+        data.balancePercent = (data.totals['exp'] / data.totals['inc']) * 100;
+
+    }
+
     data = {
         items : {
             inc: [],
@@ -84,10 +98,28 @@ var financeController = function(){
         totals: {
             inc: 0,
             exp: 0
-        }
+        },
+
+        balance : 0,
+        balancePercent: 0
     }
 
     return {
+        calculateBalance: function(){
+            calculateTotal('inc');
+            calculateTotal('exp');
+
+        },
+
+        fetchBalance: function(){
+            return {
+                balance : data.balance,
+                balancePercent : data.balancePercent,
+                totalInc : data.totals.inc,
+                totalExp : data.totals.exp
+            }
+        },
+        
         addItem: function(type, desc, val){
             console.log('Item added');
             var item,id; 
@@ -127,11 +159,20 @@ var appController = (function(uiController, financeController){
     
     var coreItemCollect = function(){
         var input = uiController.getInput();
+        
+        if(input.description !== "" && input.value !== ""){
+            var item = financeController.addItem(input.type,input.description, input.value);
 
-        var item = financeController.addItem(input.type,input.description, input.value);
+            uiController.addListItem(item, input.type);
+            uiController.clearFields();
 
-        uiController.addListItem(item, input.type);
-        uiController.clearFields();
+            financeController.calculateBalance();
+
+            var balanceFetch = financeController.fetchBalance();
+            console.log(balanceFetch);
+        }
+
+
         
     }
     
