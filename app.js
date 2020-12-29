@@ -5,8 +5,14 @@ var uiController = (function(){
         inputValue: ".add__value",
         inputBtn: '.add__btn',
         incomeList: ".income__list",
-        expenseList: ".expenses__list"
+        expenseList: ".expenses__list",
+        balanceLabel: ".budget__value",
+        totalIncomeLabel : ".budget__income--value",
+        totalExpenseLabel : ".budget__expenses--value",
+        totalExpensePercentageLabel :".budget__expenses--percentage",
+        titleLabel : ".budget__title"
 
+        
     }
     
     return {
@@ -23,9 +29,23 @@ var uiController = (function(){
             return DOMstrings;
             
         },
-
+        seeBalance :function(balance){
+            document.querySelector(DOMstrings.balanceLabel).textContent = balance.balance;
+            document.querySelector(DOMstrings.totalIncomeLabel).textContent = balance.totalInc;
+            document.querySelector(DOMstrings.totalExpenseLabel).textContent = balance.totalExp;
+            document.querySelector(DOMstrings.totalExpensePercentageLabel).textContent = balance.balancePercent + "%";
+        },
         addListItem : function(item, type){
-            var html,list;
+            var html,list, html1, date;
+
+            date = new Date();
+
+            html1 = 'This month is <span class="budget__title--month">%Month%</span>';
+
+            html1 = html1.replace("%Month%", (date.getMonth() + 1));
+            console.log(html1);
+            document.querySelector(DOMstrings.titleLabel).insertAdjacentHTML('beforeend', html1);
+
             if(type === "inc"){
                 list = DOMstrings.incomeList;
                 var html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%DESCRIPTION%</div><div class="right clearfix"><div class="item__value">%VALUE%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';  
@@ -119,6 +139,18 @@ var financeController = function(){
                 totalExp : data.totals.exp
             }
         },
+        deleteItem : function(type, id){
+            var ids = data.items[type].map(function(element){
+                return element.id;
+            });
+
+            var index = ids.indexOf(id);
+
+            if(index !== -1){
+                data.items[type].splice(index,1);
+            }
+        },
+
         
         addItem: function(type, desc, val){
             console.log('Item added');
@@ -170,6 +202,8 @@ var appController = (function(uiController, financeController){
 
             var balanceFetch = financeController.fetchBalance();
             console.log(balanceFetch);
+
+            uiController.seeBalance(balanceFetch);
         }
 
 
@@ -194,6 +228,13 @@ var appController = (function(uiController, financeController){
         init: function(){
             console.log('Application starting....');
             setupEventListener();
+
+            uiController.seeBalance({
+                balance : 0,
+                balancePercent : 0,
+                totalInc : 0,
+                totalExp : 0
+            })
         }
     }
    
