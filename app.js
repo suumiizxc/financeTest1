@@ -10,7 +10,8 @@ var uiController = (function(){
         totalIncomeLabel : ".budget__income--value",
         totalExpenseLabel : ".budget__expenses--value",
         totalExpensePercentageLabel :".budget__expenses--percentage",
-        titleLabel : ".budget__title"
+        titleLabel : ".budget__title",
+        containerDiv : ".container"
 
         
     }
@@ -215,11 +216,30 @@ var appController = (function(uiController, financeController){
 
         document.querySelector(DOMstrings.inputBtn).addEventListener("click", (function(){
             coreItemCollect();
-        }))
+        }));
     
         document.addEventListener("keypress", function(event){
             if(event.keyCode === 13){
                 coreItemCollect();
+            }
+        });
+
+        document.querySelector(DOMstrings.containerDiv).addEventListener("click", function(event){
+            var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
+            if(id){
+                var arr = id.split("-");
+                var type, itemId;
+                console.log(arr);
+                if(arr[0] === "income"){
+                    type = "inc";
+                } else {
+                    type = "exp";
+                }
+                itemId = parseInt(arr[1]);
+                financeController.deleteItem(type, itemId);
+
+                
+
             }
         })
     }
