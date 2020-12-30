@@ -36,6 +36,11 @@ var uiController = (function(){
             document.querySelector(DOMstrings.totalExpenseLabel).textContent = balance.totalExp;
             document.querySelector(DOMstrings.totalExpensePercentageLabel).textContent = balance.balancePercent + "%";
         },
+
+        deleteListItem : function(id){
+            var el = document.getElementById(id);
+            el.parentNode.removeChild(el);
+        },
         addListItem : function(item, type){
             var html,list, html1, date;
 
@@ -238,6 +243,7 @@ var appController = (function(uiController, financeController){
                 itemId = parseInt(arr[1]);
                 financeController.deleteItem(type, itemId);
 
+                uiController.deleteListItem(id);
                 
 
             }
