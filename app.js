@@ -11,12 +11,34 @@ var uiController = (function(){
         totalExpenseLabel : ".budget__expenses--value",
         totalExpensePercentageLabel :".budget__expenses--percentage",
         titleLabel : ".budget__title",
-        containerDiv : ".container"
+        containerDiv : ".container",
+        expensePercentageLabel : ".item__percentage"
 
         
     }
     
+
+    // var nodeListForEach = function(list, callBack){
+    //     for(var i = 0; i < list.length; i++){
+    //         callBack(list[i], i);
+    //     }
+    // };
+
     return {
+
+        displayPercentages : function(allPercentages){
+            var elements = document.querySelector(DOMstrings.expensePercentageLabel);
+            console.log(elements.length);
+            // nodeListForEach(elements, function(el, index){
+            //     console.log(el);
+            //     el.textContent = allPercentages[index];
+            // });
+
+
+
+
+        },
+
         getInput : function(){
             return{
                 type: document.querySelector(DOMstrings.inputType).value,
@@ -49,7 +71,7 @@ var uiController = (function(){
             html1 = 'This month is <span class="budget__title--month">%Month%</span>';
 
             html1 = html1.replace("%Month%", (date.getMonth() + 1));
-            console.log(html1);
+            
             document.querySelector(DOMstrings.titleLabel).insertAdjacentHTML('beforeend', html1);
 
             if(type === "inc"){
@@ -100,6 +122,20 @@ var financeController = function(){
         this.id = id; 
         this.description = description;
         this.value = value;
+        this.percentage = -1;
+    }
+
+    Expenses.prototype.calcPercentage = function(totalIncome){
+        if(totalIncome > 0){
+            this.percentage = Math.round((this.value / totalIncome) * 100);
+        } else {
+            this.percentage = 0;
+        }
+
+    }
+
+    Expenses.prototype.getPercentage = function(){
+        return this.percentage;
     }
 
     var calculateTotal = function(type){
@@ -112,7 +148,13 @@ var financeController = function(){
 
         data.balance = data.totals['inc'] - data.totals['exp'];
 
-        data.balancePercent = (data.totals['exp'] / data.totals['inc']) * 100;
+        if(data.totals.inc > 0){
+            data.balancePercent = (data.totals['exp'] / data.totals['inc']) * 100;
+        } else {
+            data.balancePercent = 0;
+        }
+
+        
 
     }
 
@@ -145,6 +187,20 @@ var financeController = function(){
                 totalExp : data.totals.exp
             }
         },
+
+        calculatePercentage: function(){
+            data.items.exp.forEach(function(element){
+                element.calcPercentage(data.totals.inc);
+            })
+        },
+        getPercentages: function(){
+            var allPercentages = data.items.exp.map(function(element){
+                return element.getPercentage();
+            })
+
+            return allPercentages;
+        },
+
         deleteItem : function(type, id){
             var ids = data.items[type].map(function(element){
                 return element.id;
@@ -204,18 +260,30 @@ var appController = (function(uiController, financeController){
             uiController.addListItem(item, input.type);
             uiController.clearFields();
 
-            financeController.calculateBalance();
-
-            var balanceFetch = financeController.fetchBalance();
-            console.log(balanceFetch);
-
-            uiController.seeBalance(balanceFetch);
+            updateBalance();
         }
 
-
-        
     }
     
+    var updateBalance = function(){
+        financeController.calculateBalance();
+
+            var balanceFetch = financeController.fetchBalance();
+
+            uiController.seeBalance(balanceFetch);
+
+            financeController.calculatePercentage();
+
+            var allPercentages = financeController.getPercentages();
+
+
+            if(allPercentages.length !== 0){
+                console.log('RUn if');
+                uiController.displayPercentages(allPercentages);
+            }
+            
+}
+
     var setupEventListener = function(){
         var DOMstrings = uiController.getDOMstrings();
 
@@ -234,7 +302,7 @@ var appController = (function(uiController, financeController){
             if(id){
                 var arr = id.split("-");
                 var type, itemId;
-                console.log(arr);
+                
                 if(arr[0] === "income"){
                     type = "inc";
                 } else {
@@ -245,6 +313,7 @@ var appController = (function(uiController, financeController){
 
                 uiController.deleteListItem(id);
                 
+                updateBalance();
 
             }
         })
