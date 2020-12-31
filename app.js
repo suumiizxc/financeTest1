@@ -18,23 +18,20 @@ var uiController = (function(){
     }
     
 
-    // var nodeListForEach = function(list, callBack){
-    //     for(var i = 0; i < list.length; i++){
-    //         callBack(list[i], i);
-    //     }
-    // };
+    var nodeListForEach = function(list, callBack){
+        for(var i = 0; i < list.length; i++){
+            callBack(list[i], i);
+        }
+    };
 
     return {
 
         displayPercentages : function(allPercentages){
-            var elements = document.querySelector(DOMstrings.expensePercentageLabel);
-            console.log(elements.length);
-            // nodeListForEach(elements, function(el, index){
-            //     console.log(el);
-            //     el.textContent = allPercentages[index];
-            // });
-
-
+            var elements = document.querySelectorAll(DOMstrings.expensePercentageLabel);
+            
+            nodeListForEach(elements, function(el, index){
+                el.textContent=allPercentages[index] + "%";
+            })
 
 
         },
@@ -277,11 +274,8 @@ var appController = (function(uiController, financeController){
             var allPercentages = financeController.getPercentages();
 
 
-            if(allPercentages.length !== 0){
-                console.log('RUn if');
-                uiController.displayPercentages(allPercentages);
-            }
-            
+            uiController.displayPercentages(allPercentages);
+ 
 }
 
     var setupEventListener = function(){
