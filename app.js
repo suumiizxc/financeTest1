@@ -12,7 +12,8 @@ var uiController = (function(){
         totalExpensePercentageLabel :".budget__expenses--percentage",
         titleLabel : ".budget__title",
         containerDiv : ".container",
-        expensePercentageLabel : ".item__percentage"
+        expensePercentageLabel : ".item__percentage",
+        dateLabel: ".budget__title--month"
 
         
     }
@@ -24,7 +25,45 @@ var uiController = (function(){
         }
     };
 
+    var formatMoney = function(number,type){
+        number = "" + number;
+        
+        var x = number.split("").reverse().join("");
+        
+        var y = "";
+        var count = 1;
+        for(var i = 0; i < x.length; i++){
+            y = y + x[i];
+
+            if(count % 3 === 0){
+                y = y + ",";
+            }
+
+            count = count + 1;
+
+        }
+        
+        var z = y.split("").reverse().join("");
+        
+        if(z[0] === ","){
+            z = z.substr(1, z.length - 1);
+        }
+
+        if(type === 'inc'){
+            z = "+" + z;
+        } else {
+            z = "-" + z;
+        }
+        return(z);
+
+    }
+
     return {
+
+        displayDate : function(){
+            var date = new Date();
+            document.querySelector(DOMstrings.dateLabel).textContent = date.getFullYear() + " оны " + (date.getMonth() + 1)+ " сарын "
+        },  
 
         displayPercentages : function(allPercentages){
             var elements = document.querySelectorAll(DOMstrings.expensePercentageLabel);
@@ -50,10 +89,18 @@ var uiController = (function(){
             
         },
         seeBalance :function(balance){
-            document.querySelector(DOMstrings.balanceLabel).textContent = balance.balance;
-            document.querySelector(DOMstrings.totalIncomeLabel).textContent = balance.totalInc;
-            document.querySelector(DOMstrings.totalExpenseLabel).textContent = balance.totalExp;
-            document.querySelector(DOMstrings.totalExpensePercentageLabel).textContent = balance.balancePercent + "%";
+
+            var type;
+            if(balance.balance >= 0) {
+                type = 'inc';
+            } else {
+                type = 'exp';
+            }
+
+            document.querySelector(DOMstrings.balanceLabel).textContent = formatMoney(balance.balance,type);
+            document.querySelector(DOMstrings.totalIncomeLabel).textContent = formatMoney(balance.totalInc,'inc');
+            document.querySelector(DOMstrings.totalExpenseLabel).textContent = formatMoney(balance.totalExp,'exp');
+            document.querySelector(DOMstrings.totalExpensePercentageLabel).textContent = Math.round(balance.balancePercent) + "%";
         },
 
         deleteListItem : function(id){
@@ -61,15 +108,7 @@ var uiController = (function(){
             el.parentNode.removeChild(el);
         },
         addListItem : function(item, type){
-            var html,list, html1, date;
-
-            date = new Date();
-
-            html1 = 'This month is <span class="budget__title--month">%Month%</span>';
-
-            html1 = html1.replace("%Month%", (date.getMonth() + 1));
-            
-            document.querySelector(DOMstrings.titleLabel).insertAdjacentHTML('beforeend', html1);
+            var html,list;
 
             if(type === "inc"){
                 list = DOMstrings.incomeList;
@@ -81,7 +120,7 @@ var uiController = (function(){
 
             html = html.replace("%id%", item.id);
             html = html.replace("%DESCRIPTION%", item.description);
-            html = html.replace("%VALUE%", item.value);
+            html = html.replace("%VALUE%", formatMoney(item.value,type));
             
             document.querySelector(list).insertAdjacentHTML('beforeend', html);
         },
@@ -317,7 +356,7 @@ var appController = (function(uiController, financeController){
         init: function(){
             console.log('Application starting....');
             setupEventListener();
-
+            uiController.displayDate();
             uiController.seeBalance({
                 balance : 0,
                 balancePercent : 0,
