@@ -75,6 +75,18 @@ var uiController = (function(){
 
         },
 
+        changeType : function(){
+            var fields = document.querySelectorAll(DOMstrings.inputType + ', ' + DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+            console.log(fields);
+
+            nodeListForEach(fields, function(el){
+                el.classList.toggle('red-focus'); // toggle ni baival hasna, baihgui bol nemne
+            })
+
+            document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
+        },
+
+
         getInput : function(){
             return{
                 type: document.querySelector(DOMstrings.inputType).value,
@@ -329,6 +341,8 @@ var appController = (function(uiController, financeController){
                 coreItemCollect();
             }
         });
+
+        document.querySelector(DOMstrings.inputType).addEventListener('change', uiController.changeType);
 
         document.querySelector(DOMstrings.containerDiv).addEventListener("click", function(event){
             var id = event.target.parentNode.parentNode.parentNode.parentNode.id;
